@@ -103,51 +103,48 @@ const BOT_TOKEN = process.env.bot; // put your bot token here
                     await fsPromises.mkdir("./thumbnail");
                 }
 
-                ffmpeg.ffprobe(filePath, (error, metadata) => {
+                ffmpeg.ffprobe(filePath, async (error, metadata) => {
                     console.log("done", filePath);
                     const duration = metadata.format.duration;
-                    console.log(duration);
 
-                    const timeIndex = "00:00:10";
+                    await client.sendFile(chatID, {
+                        file: filePath,
+                        caption: fileName,
+                        attributes: [
+                            new Api.DocumentAttributeVideo({
+                                w: 640,
+                                h: 480,
+                                supportsStreaming: true,
+                                duration,
+                            }),
+                        ],
+                        workers: 1,
+                        progressCallback: (pro) => {
+                            console.log(
+                                "Uploadind Torrent: " + pro * 100 + "%"
+                            );
+                        },
+                    });
 
-                    ffmpeg(filePath)
-                        .on("end", async function () {
-                            await client.sendFile(chatID, {
-                                file: filePath,
-                                caption: fileName,
-                                thumb: "./thumbnail/thumbnail.jpg",
-                                attributes: [
-                                    new Api.DocumentAttributeVideo({
-                                        w: 640,
-                                        h: 480,
-                                        supportsStreaming: true,
-                                        duration,
-                                    }),
-                                ],
-                                workers: 1,
-                                progressCallback: (pro) => {
-                                    console.log(
-                                        "Uploadind Torrent: " + pro * 100 + "%"
-                                    );
-                                },
-                            });
+                    // ffmpeg(filePath)
+                    //     .on("end", async function () {
 
-                            await fsPromises.rm(`./downloads/${fileName}`);
-                            await fsPromises.rm(`./thumbnail/thumbnail.jpg`);
+                    //         await fsPromises.rm(`./downloads/${fileName}`);
+                    //         await fsPromises.rm(`./thumbnail/thumbnail.jpg`);
 
-                            await client.sendMessage(chatID, {
-                                message: "You can send new url",
-                            });
-                        })
-                        .on("error", function (err) {
-                            console.error(err);
-                        })
-                        .screenshots({
-                            count: 1,
-                            timemarks: [timeIndex],
-                            filename: "thumbnail.jpg",
-                            folder: "./thumbnail",
-                        });
+                    //         await client.sendMessage(chatID, {
+                    //             message: "You can send new url",
+                    //         });
+                    //     })
+                    //     .on("error", function (err) {
+                    //         console.error(err);
+                    //     })
+                    //     .screenshots({
+                    //         count: 1,
+                    //         timemarks: [timeIndex],
+                    //         filename: "thumbnail.jpg",
+                    //         folder: "./thumbnail",
+                    //     });
                 });
             });
         }
