@@ -2,13 +2,12 @@ import { TelegramClient, Api } from "telegram";
 import { StringSession } from "telegram/sessions/index.js";
 import express from "express";
 import https from "https";
-// 1BAAOMTQ5LjE1NC4xNjcuOTEAUBQJTmQDXa+9/jYI0PYyo8ZHKYKegitOCDXtuj5bOpoTHJi9Bjmc4osDxBb6hxcFLNykKXwOdvJkr6+txuNYcZYKrWXnCSr++EAHHyxNGNDqnDs4po2FkRK/td5LKiCIIuRsOc38VAeDOh/Qn8/hcRxMKqZXMkmYYQXw+u2xpcFRQoKbFIppDFmp8XJmRpYqfsnRT0lvXvAt8yBxuFrGQRHm3vqJZ0qA4jNvNtlQ6vzrAwd/A5FbkKkJBJrJ4deZihjBRSb9LlRlyn9qXknJAePE+kQ1irovNnR7hlasi66zBGbEA5uRqHSw1INsqfkOYnVKcdQjdCWnEVsKikbZ3W0=
-import ffmpeg from "fluent-ffmpeg";
+// import ffmpeg from "fluent-ffmpeg";
 
 import dotenv from "dotenv";
 import fs, { promises as fsPromises } from "fs";
 import path from "path";
-import { NewMessage } from "telegram/events";
+import { NewMessage } from "telegram/events.js";
 
 dotenv.config();
 
