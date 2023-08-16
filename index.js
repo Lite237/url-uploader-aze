@@ -1,12 +1,11 @@
 import { TelegramClient, Api } from "telegram";
 import { StringSession } from "telegram/sessions/index.js";
 import express from "express";
-import https from "https";
+import { DownloaderHelper } from "node-downloader-helper";
 // import ffmpeg from "fluent-ffmpeg";
 
 import dotenv from "dotenv";
 import fs, { promises as fsPromises } from "fs";
-import path from "path";
 import { NewMessage } from "telegram/events/index.js";
 
 dotenv.config();
@@ -72,34 +71,14 @@ const BOT_TOKEN = process.env.bot; // put your bot token here
             }
 
             const fileName = path.basename(videoURL);
-            const filePath = `./downloads/${fileName}`;
+            const filePath = `./downloads`;
 
-            fs.closeSync(fs.openSync(filePath, "w"));
-
-            const file = fs.createWriteStream(filePath);
-
-            const request = https.get(videoURL, async function (response) {
-                const totalLength = response.headers["content-length"];
-                let downloadedLength = 0;
-
-                await client.sendMessage(chatID, {
-                    message: "Video size: " + totalLength / 1024 / 1024 + "MB",
-                });
-
-                response.on("data", function (chunk) {
-                    downloadedLength += chunk.length;
-                    console.log(
-                        `Downloaded ${(
-                            (downloadedLength / totalLength) *
-                            100
-                        ).toFixed(2)}%`
-                    );
-                });
-
-                response.pipe(file);
+            const dl = new DownloaderHelper(videoURL, filePath, {
+                fileName,
             });
+            dl.on("end", async () => {
+                console.log("Download Completed");
 
-            file.on("finish", async function () {
                 await client.sendMessage(chatID, {
                     message: "Uploading video to telegram",
                 });
@@ -116,36 +95,44 @@ const BOT_TOKEN = process.env.bot; // put your bot token here
                 } catch (error) {
                     console.log(error);
                 }
-
-                // if (!fs.existsSync("./thumbnail")) {
-                //     await fsPromises.mkdir("./thumbnail");
-                // }
-
-                // ffmpeg.ffprobe(filePath, async (error, metadata) => {
-                //     console.log("done", filePath);
-                //     const duration = metadata.format.duration;
-
-                // ffmpeg(filePath)
-                //     .on("end", async function () {
-
-                //         await fsPromises.rm(`./downloads/${fileName}`);
-                //         await fsPromises.rm(`./thumbnail/thumbnail.jpg`);
-
-                //         await client.sendMessage(chatID, {
-                //             message: "You can send new url",
-                //         });
-                //     })
-                //     .on("error", function (err) {
-                //         console.error(err);
-                //     })
-                //     .screenshots({
-                //         count: 1,
-                //         timemarks: [timeIndex],
-                //         filename: "thumbnail.jpg",
-                //         folder: "./thumbnail",
-                //     });
-                // });
             });
+
+            dl.on("error", (err) => console.log("Download Failed", err));
+
+            dl.on("progress", (c) =>
+                console.log(`${c.progress} / ${c.downloaded} / ${c.total}`)
+            );
+
+            dl.start().catch((err) => console.error(err));
+
+            // if (!fs.existsSync("./thumbnail")) {
+            //     await fsPromises.mkdir("./thumbnail");
+            // }
+
+            // ffmpeg.ffprobe(filePath, async (error, metadata) => {
+            //     console.log("done", filePath);
+            //     const duration = metadata.format.duration;
+
+            // ffmpeg(filePath)
+            //     .on("end", async function () {
+
+            //         await fsPromises.rm(`./downloads/${fileName}`);
+            //         await fsPromises.rm(`./thumbnail/thumbnail.jpg`);
+
+            //         await client.sendMessage(chatID, {
+            //             message: "You can send new url",
+            //         });
+            //     })
+            //     .on("error", function (err) {
+            //         console.error(err);
+            //     })
+            //     .screenshots({
+            //         count: 1,
+            //         timemarks: [timeIndex],
+            //         filename: "thumbnail.jpg",
+            //         folder: "./thumbnail",
+            //     });
+            // });
         }
     }, new NewMessage({}));
 })();
