@@ -7,7 +7,7 @@ import https from "https";
 import dotenv from "dotenv";
 import fs, { promises as fsPromises } from "fs";
 import path from "path";
-import { NewMessage } from "telegram/events.js";
+import { NewMessage } from "telegram/events/index.js";
 
 dotenv.config();
 
