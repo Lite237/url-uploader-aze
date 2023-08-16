@@ -8,6 +8,7 @@ import ffmpeg from "fluent-ffmpeg";
 import dotenv from "dotenv";
 import fs, { promises as fsPromises } from "fs";
 import path from "path";
+import { NewMessage } from "telegram/events";
 
 dotenv.config();
 
