@@ -2,7 +2,7 @@ import { TelegramClient, Api } from "telegram";
 import { StringSession } from "telegram/sessions/index.js";
 import express from "express";
 import https from "https";
-
+// 1BAAOMTQ5LjE1NC4xNjcuOTEAUBQJTmQDXa+9/jYI0PYyo8ZHKYKegitOCDXtuj5bOpoTHJi9Bjmc4osDxBb6hxcFLNykKXwOdvJkr6+txuNYcZYKrWXnCSr++EAHHyxNGNDqnDs4po2FkRK/td5LKiCIIuRsOc38VAeDOh/Qn8/hcRxMKqZXMkmYYQXw+u2xpcFRQoKbFIppDFmp8XJmRpYqfsnRT0lvXvAt8yBxuFrGQRHm3vqJZ0qA4jNvNtlQ6vzrAwd/A5FbkKkJBJrJ4deZihjBRSb9LlRlyn9qXknJAePE+kQ1irovNnR7hlasi66zBGbEA5uRqHSw1INsqfkOYnVKcdQjdCWnEVsKikbZ3W0=
 import ffmpeg from "fluent-ffmpeg";
 
 import dotenv from "dotenv";
@@ -26,7 +26,7 @@ app.listen(3000, () => {
 const apiId = parseInt(process.env.APP_API_ID);
 const apiHash = process.env.APP_API_HASH;
 
-const stringSession = process.env.APP_SESSION || ""; // leave this empty for now
+const stringSession = process.env.APP_SESSION; // leave this empty for now
 const BOT_TOKEN = process.env.bot; // put your bot token here
 
 (async () => {
@@ -49,6 +49,7 @@ const BOT_TOKEN = process.env.bot; // put your bot token here
 
     client.addEventHandler(async (update) => {
         const chatID = Number(update.message.chatId);
+        console.log(chatID);
 
         if (update.message.message.startsWith("/start")) {
             await client.sendMessage(chatID, {
@@ -146,7 +147,7 @@ const BOT_TOKEN = process.env.bot; // put your bot token here
                 // });
             });
         }
-    });
+    }, new NewMessage({}));
 })();
 
 process.on("uncaughtException", (err) => {
