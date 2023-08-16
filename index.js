@@ -6,6 +6,7 @@ import { DownloaderHelper } from "node-downloader-helper";
 
 import dotenv from "dotenv";
 import fs, { promises as fsPromises } from "fs";
+import path from "path";
 import { NewMessage } from "telegram/events/index.js";
 
 dotenv.config();
