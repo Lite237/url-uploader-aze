@@ -72,7 +72,7 @@ const BOT_TOKEN = process.env.bot; // put your bot token here
             }
 
             const fileName = path.basename(videoURL);
-            const filePath = `./downloads`;
+            const filePath = `./downloads/${fileName}`;
 
             const dl = new DownloaderHelper(videoURL, filePath, {
                 fileName,
