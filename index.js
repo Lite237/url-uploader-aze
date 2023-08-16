@@ -26,7 +26,7 @@ app.listen(3000, () => {
 const apiId = parseInt(process.env.APP_API_ID);
 const apiHash = process.env.APP_API_HASH;
 
-const stringSession = process.env.APP_SESSION; // leave this empty for now
+const stringSession = process.env.APP_SESSION || ""; // leave this empty for now
 const BOT_TOKEN = process.env.bot; // put your bot token here
 
 (async () => {
@@ -63,7 +63,7 @@ const BOT_TOKEN = process.env.bot; // put your bot token here
             const videoURL = update.message.message;
 
             await client.sendMessage(chatID, {
-                message: "Downloading Video",
+                message: `Downloading Video at ${videoURL}`,
             });
 
             if (!fs.existsSync("./downloads")) {
@@ -82,7 +82,7 @@ const BOT_TOKEN = process.env.bot; // put your bot token here
                 let downloadedLength = 0;
 
                 await client.sendMessage(chatID, {
-                    message: "Video size: " + totalLength / 1024 / 1024,
+                    message: "Video size: " + totalLength / 1024 / 1024 + "MB",
                 });
 
                 response.on("data", function (chunk) {
@@ -99,21 +99,23 @@ const BOT_TOKEN = process.env.bot; // put your bot token here
             });
 
             file.on("finish", async function () {
-                await client.sendFile(chatID, {
-                    file: filePath,
-                    caption: fileName,
-                    attributes: [
-                        new Api.DocumentAttributeVideo({
-                            w: 640,
-                            h: 480,
-                            supportsStreaming: true,
-                        }),
-                    ],
-                    workers: 1,
-                    progressCallback: (pro) => {
-                        console.log("Uploadind Torrent: " + pro * 100 + "%");
-                    },
+                await client.sendMessage(chatID, {
+                    message: "Uploading video to telegram",
                 });
+
+                try {
+                    await client.sendFile(chatID, {
+                        file: filePath,
+                        caption: fileName,
+                        workers: 1,
+                        progressCallback: (pro) => {
+                            console.log("Uplaoded: " + pro * 100 + "%");
+                        },
+                    });
+                } catch (error) {
+                    console.log(error);
+                }
+
                 // if (!fs.existsSync("./thumbnail")) {
                 //     await fsPromises.mkdir("./thumbnail");
                 // }
@@ -149,4 +151,5 @@ const BOT_TOKEN = process.env.bot; // put your bot token here
 
 process.on("uncaughtException", (err) => {
     console.log(err);
+    process.exit(1);
 });
