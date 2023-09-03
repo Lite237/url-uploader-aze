@@ -1,12 +1,14 @@
 import { TelegramClient, Api } from "telegram";
 import { StringSession } from "telegram/sessions/index.js";
 import express from "express";
-import { DownloaderHelper } from "node-downloader-helper";
+// import input from "input";
+// import { DownloaderHelper } from "node-downloader-helper";
 // import ffmpeg from "fluent-ffmpeg";
+import { v4 as uuidv4 } from "uuid";
 
 import dotenv from "dotenv";
 import fs, { promises as fsPromises } from "fs";
-import path from "path";
+// import path from "path";
 import { NewMessage } from "telegram/events/index.js";
 
 dotenv.config();
@@ -19,14 +21,15 @@ app.get("/", (req, res) => {
     res.send("Hello");
 });
 
-app.listen(3000, () => {
-    console.log("listening");
-});
+// app.listen(3000, () => {
+//     console.log("listening");
+// });
 
 const apiId = parseInt(process.env.APP_API_ID);
 const apiHash = process.env.APP_API_HASH;
 
-const stringSession = process.env.APP_SESSION; // leave this empty for now
+// const stringSession = process.env.APP_SESSION; // leave this empty for now
+const stringSession = process.env.APP_SESSION_BOT; // leave this empty for now
 const BOT_TOKEN = process.env.bot; // put your bot token here
 
 (async () => {
@@ -34,12 +37,22 @@ const BOT_TOKEN = process.env.bot; // put your bot token here
         new StringSession(stringSession),
         apiId,
         apiHash,
-        { connectionRetries: 5 }
+        {
+            connectionRetries: 5,
+        }
     );
 
     if (stringSession) {
-        await client.start();
+        console.log("connecting");
+        await client.connect();
     } else {
+        // await client.start({
+        //     phoneNumber: async () => await input.text("number ?"),
+        //     password: async () => await input.text("password?"),
+        //     phoneCode: async () => await input.text("Code ?"),
+        //     onError: (err) => console.log(err),
+        // });
+
         await client.start({
             botAuthToken: BOT_TOKEN,
         });
@@ -49,7 +62,44 @@ const BOT_TOKEN = process.env.bot; // put your bot token here
 
     client.addEventHandler(async (update) => {
         const chatID = Number(update.message.chatId);
-        console.log(chatID);
+        console.log(update.message.chatId);
+
+        if (update.message.media) {
+            await client.sendMessage(chatID, {
+                message: "Downloading to my server !!",
+            });
+
+            if (!fs.existsSync("./downloads")) {
+                await fsPromises.mkdir("./downloads");
+            }
+
+            const isImage =
+                update.message.media.className === "MessageMediaPhoto";
+
+            const URL = await client.downloadMedia(update.message.media, {
+                progressCallback: (total, downloaded) => {
+                    console.log(
+                        `${Math.floor(
+                            total / downloaded
+                        )}% - ${total}/${downloaded}`
+                    );
+                },
+                outputFile: `./downloads/${uuidv4()}${
+                    isImage ? ".jpg" : ".mp4"
+                }`,
+            });
+
+            await client.sendMessage(chatID, {
+                message: `The file is available at ${URL}`,
+            });
+
+            console.log("done");
+        }
+    }, new NewMessage({}));
+
+    /*client.addEventHandler(async (update) => {
+        const chatID = Number(update.message.chatId);
+        console.log(update.message.message);
 
         if (update.message.message.startsWith("/start")) {
             await client.sendMessage(chatID, {
@@ -135,7 +185,7 @@ const BOT_TOKEN = process.env.bot; // put your bot token here
             //     });
             // });
         }
-    }, new NewMessage({}));
+    }, new NewMessage({}));*/
 })();
 
 process.on("uncaughtException", (err) => {
