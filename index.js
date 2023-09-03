@@ -21,9 +21,9 @@ app.get("/", (req, res) => {
     res.send("Hello");
 });
 
-// app.listen(3000, () => {
-//     console.log("listening");
-// });
+app.listen(3000, () => {
+    console.log("listening");
+});
 
 const apiId = parseInt(process.env.APP_API_ID);
 const apiHash = process.env.APP_API_HASH;
@@ -68,6 +68,7 @@ const BOT_TOKEN = process.env.bot; // put your bot token here
             await client.sendMessage(chatID, {
                 message: "Downloading to my server !!",
             });
+            // 1BAAOMTQ5LjE1NC4xNjcuOTEAUGjszSmqNJGUf3bDsHwWR9SxodrzVOu9Rnmc/mDGrtLUuQDsS56kIsL7Z1IELkGICOLHw+YoS1f8Dsb6n+cBfGKCyMNZOrT7Tap5Hn6jx9pAbTkaVJUsbai1F/i8TNYWcTpatPjofSs+mQ1NSMSi0sr7Qsytsa38E3QCAgbi6LZCERu1Dv7ViHbTeKiZcsXcjkr2q51ZkQheuWBYQNv/CwOIuUB56C/OB+1MJu2AXvgWJY7XDozAfhB/EYYAd3XnTx5lE6tJ91sOqnD3+h6iPXHHFSTpgmPUbgDhrUPDi9kh9teaCVATowAlpLcYr+98GSZRRQyBCYLaJcvFdLPDiok=
 
             if (!fs.existsSync("./downloads")) {
                 await fsPromises.mkdir("./downloads");
